@@ -1,98 +1,57 @@
+import { BASE_URL } from "@/constants";
 import { Cart, type CartItem } from "@/models/cart.model";
-import { products } from "@/services/product.service";
+import { CartSchema } from "@/schemas/cart.schema";
 
 export function calculateTotal(items: CartItem[]): number {
   return items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 }
 
-const blankCart: Cart = {
-  id: 0,
-  items: [],
-  totals: {
-    itemCount: 0,
-    grandTotal: 0,
-  },
-  createdAt: "",
-  updatedAt: "",
-};
-
-function getSavedCart(): Cart | null {
-  const savedCart = localStorage.getItem("cart");
-  return savedCart ? JSON.parse(savedCart) : null;
+export async function getCart(): Promise<Cart | null> {
+  const res = await fetch(`${BASE_URL}/cart`, {credentials: "include"});
+  if (!res.ok) {
+    const errorMessage = await res.text();
+    console.log(`Error fetching cart ${errorMessage}`);
+    return null;
+  }
+  const cartResponse = await res.json();
+  return CartSchema.parse(cartResponse);
 }
 
-function saveCart(cart: Cart): void {
-  localStorage.setItem("cart", JSON.stringify(cart));
-}
-
-export function getCart(): Promise<Cart> {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const savedCart = getSavedCart();
-      if (!savedCart) {
-        saveCart(blankCart);
-        resolve(blankCart);
-        return;
-      }
-      resolve(savedCart);
-    }, 350);
-  });
-}
-
-export function updateCartItem(
+export async function updateCartItem(
   productId: number,
   quantity: number
 ): Promise<Cart> {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const cart = getSavedCart() || blankCart;
 
-      const item = cart.items.find((item) => item.productId === productId);
-      if (item) {
-        item.quantity = quantity;
-        item.lineTotal = item.price * quantity;
-      } else {
-        const product = products.find((p) => p.id === productId);
-        if (product) {
-          cart.items.push({
-            productId: product.id,
-            title: product.title,
-            imgSrc: product.imgSrc,
-            quantity: quantity,
-            price: product.price,
-            lineTotal: product.price * quantity,
-          });
-        }
-      }
-      cart.totals.itemCount = cart.items.reduce(
-        (sum, item) => sum + item.quantity,
-        0
-      );
-      cart.totals.grandTotal = calculateTotal(cart.items);
-
-      saveCart(cart);
-      resolve(cart);
-    }, 350);
-  });
+  const options: RequestInit = {
+    method: "PATCH",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({quantity})
+  }
+  const res = await fetch(`${BASE_URL}/cart/items/${productId}`, options);
+  if (!res.ok) {
+    const errorMessage = await res.json();
+    throw new Error(` updating cart item ${errorMessage.error}`);
+  }
+  const cartResponse = await res.json();
+  return CartSchema.parse(cartResponse);
 }
 
-export function removeCartItem(productId: number): Cart {
-  const cart = getSavedCart() || blankCart;
-  cart.items = cart.items.filter((item) => item.productId !== productId);
-  cart.totals.itemCount = cart.items.reduce(
-    (sum, item) => sum + item.quantity,
-    0
-  );
-  cart.totals.grandTotal = calculateTotal(cart.items);
-  saveCart(cart);
-  return cart;
+export async function removeCartItem(productId: number): Promise<Cart> {
+  const options: RequestInit = {
+    method: "DELETE",
+    credentials: "include",
+  } 
+  const res = await fetch(`${BASE_URL}/cart/items/${productId}`, options);
+  if (!res.ok) {
+    throw new Error(`Error removing cart item`);
+  }
+  const cartResponse =await getCart();
+  return CartSchema.parse(cartResponse);
 }
 
-export function clearCart(): Promise<void> {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      localStorage.removeItem("cart");
-      resolve();
-    }, 350);
-  });
+export async function clearCart(): Promise<void> {
+  await fetch(`${BASE_URL}/cart/clear`, {method: "POST", credentials: "include"})
 }
