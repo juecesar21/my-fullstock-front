@@ -1,0 +1,83 @@
+import { z } from "zod";
+
+const backendShippingInfoSchema = z.object({
+    firstName: z.string(),
+    lastName: z.string(),
+    company: z.string().optional(),
+    addres: z.string(),
+    city: z.string(),
+    coutry: z.string(),
+    state: z.string(),
+    postalCode: z.string(),
+    phone: z.string(),
+});
+export const OrderFromApiSchema = z.object({
+    id: z.number(),
+    userId: z.number(),
+    email: z.string(),
+    shippingInfo: backendShippingInfoSchema,
+    status: z.enum(["pending", "shipped", "delivered", "cancelled"]),
+    total: z.number(),
+    createAt: z.string(),
+    updateAt: z.string(),
+ }).transform((apiOrder) => ({
+    id: apiOrder.id,
+    userId: apiOrder.userId,
+    email: apiOrder.email,
+    details: {
+        firstName: apiOrder.shippingInfo.firstName,
+        lastName: apiOrder.shippingInfo.lastName,
+        company: apiOrder.shippingInfo.company ?? undefined,
+        address: apiOrder.shippingInfo.addres,
+        city: apiOrder.shippingInfo.city,
+        country: apiOrder.shippingInfo.coutry,
+        state: apiOrder.shippingInfo.state,
+        postalCode: apiOrder.shippingInfo.postalCode,
+        phone: apiOrder.shippingInfo.phone,
+    },
+    status: apiOrder.status,
+    total: apiOrder.total,
+    createdAt: apiOrder.createAt,
+    updatedAt: apiOrder.updateAt,
+ }));
+
+const frontendDetailsSchema = z.object({
+  firstName: z.string(),
+  lastName: z.string(),
+  company: z.string().optional(),
+  address: z.string(),
+  city: z.string(),
+  country: z.string(),
+  state: z.string(),
+  postalCode: z.string(),
+  phone: z.string(),
+});
+export const OrderToApiSchema = z.object({
+  id: z.number(),
+  userId: z.number(),
+  email: z.string(),
+  details: frontendDetailsSchema,
+  status: z.string().nullable(),
+  total: z.number(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+}).transform((frontOrder) => ({
+  id: frontOrder.id,
+  userId: frontOrder.userId,
+  email: frontOrder.email,
+  shippingInfo: {
+    firstName: frontOrder.details.firstName,
+    lastName: frontOrder.details.lastName,
+    company: frontOrder.details.company,
+    addres: frontOrder.details.address,
+    city: frontOrder.details.city,
+    coutry: frontOrder.details.country,
+    state: frontOrder.details.state,
+    postalCode: frontOrder.details.postalCode,
+    phone: frontOrder.details.phone,
+  },
+  status: frontOrder.status,
+  total: frontOrder.total,
+  createAt: frontOrder.createdAt,
+  updateAt: frontOrder.updatedAt,
+}));
