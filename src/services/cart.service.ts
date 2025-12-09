@@ -1,60 +1,98 @@
-import { BASE_URL } from "@/constants";
-import { Cart } from "@/models/cart.model";
-import { CartSchema } from "@/schemas/cart.schema";
+import { Cart, type CartItem } from "@/models/cart.model";
+import { products } from "@/services/product.service";
 
-export async function getCart(): Promise<Cart | null> {
-  const res = await fetch(`${BASE_URL}/cart`, {credentials: "include"});
-  if (!res.ok) {
-   console.log("Error fetching cart:", await res.text());
-    return null;
-  }
-  const cartResponse = await res.json();
-  return CartSchema.parse(cartResponse);
+export function calculateTotal(items: CartItem[]): number {
+  return items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 }
 
-export async function updateCartItem(
+const blankCart: Cart = {
+  id: 0,
+  items: [],
+  totals: {
+    itemCount: 0,
+    grandTotal: 0,
+  },
+  createdAt: "",
+  updatedAt: "",
+};
+
+function getSavedCart(): Cart | null {
+  const savedCart = localStorage.getItem("cart");
+  return savedCart ? JSON.parse(savedCart) : null;
+}
+
+function saveCart(cart: Cart): void {
+  localStorage.setItem("cart", JSON.stringify(cart));
+}
+
+export function getCart(): Promise<Cart> {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const savedCart = getSavedCart();
+      if (!savedCart) {
+        saveCart(blankCart);
+        resolve(blankCart);
+        return;
+      }
+      resolve(savedCart);
+    }, 350);
+  });
+}
+
+export function updateCartItem(
   productId: number,
   quantity: number
 ): Promise<Cart> {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const cart = getSavedCart() || blankCart;
 
-  const options: RequestInit = {
-    method: "PATCH",
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({quantity})
-  }
-  const res = await fetch(`${BASE_URL}/cart/items/${productId}`, options);
-  if (!res.ok) {
-    let message = "Unknown error";
-    try {
-      const err = await res.json();
-      message = err.error || JSON.stringify(err);
-    } catch {
-      message = await res.json();
-    }
-    throw new Error(`Error updating cart item ${message}`);
-  }
-  const cartResponse = await res.json();
-  return CartSchema.parse(cartResponse);
+      const item = cart.items.find((item) => item.productId === productId);
+      if (item) {
+        item.quantity = quantity;
+        item.lineTotal = item.price * quantity;
+      } else {
+        const product = products.find((p) => p.id === productId);
+        if (product) {
+          cart.items.push({
+            productId: product.id,
+            title: product.title,
+            imgSrc: product.imgSrc,
+            quantity: quantity,
+            price: product.price,
+            lineTotal: product.price * quantity,
+          });
+        }
+      }
+      cart.totals.itemCount = cart.items.reduce(
+        (sum, item) => sum + item.quantity,
+        0
+      );
+      cart.totals.grandTotal = calculateTotal(cart.items);
+
+      saveCart(cart);
+      resolve(cart);
+    }, 350);
+  });
 }
 
-export async function removeCartItem(productId: number): Promise<Cart> {
-  const options: RequestInit = {
-    method: "DELETE",
-    credentials: "include",
-  } 
-  const res = await fetch(`${BASE_URL}/cart/items/${productId}`, options);
-  if (!res.ok) {
-    throw new Error(`Error removing cart item`);
-  }
-  const cart =await getCart();
-  if (!cart) throw new Error("Cart not found after removing item");
+export function removeCartItem(productId: number): Cart {
+  const cart = getSavedCart() || blankCart;
+  cart.items = cart.items.filter((item) => item.productId !== productId);
+  cart.totals.itemCount = cart.items.reduce(
+    (sum, item) => sum + item.quantity,
+    0
+  );
+  cart.totals.grandTotal = calculateTotal(cart.items);
+  saveCart(cart);
   return cart;
 }
 
-export async function clearCart(): Promise<void> {
-  const res = await fetch(`${BASE_URL}/cart/clear`, {method: "POST", credentials: "include"});
-  if (!res.ok) throw new Error("Error clearing cart");
+export function clearCart(): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      localStorage.removeItem("cart");
+      resolve();
+    }, 350);
+  });
 }
