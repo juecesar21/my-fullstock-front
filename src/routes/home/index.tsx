@@ -39,11 +39,18 @@ export default function Home() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    getAllCategories()
-      .then(setCategories)
-      .finally(() => setLoading(false));
-  }, []);
+useEffect(() => {
+  getAllCategories()
+    .then((data) => {
+      if (Array.isArray(data)) {
+        setCategories(data);
+      } else {
+        console.error("Invalid categories response:", data);
+        setCategories([]);
+      }
+    })
+    .finally(() => setLoading(false));
+}, []);
 
   if (loading) return <ContainerLoader />;
 
