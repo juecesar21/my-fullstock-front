@@ -4,3 +4,5 @@ export interface User {
   createdAt: string;
   updatedAt: string;
 }
+
+export type UserDto = Pick<User, "email"> & {password?: string};

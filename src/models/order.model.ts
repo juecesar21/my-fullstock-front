@@ -21,6 +21,10 @@ export interface Order {
   updatedAt: string;
 }
 
+export type OrderResponse = Omit<Order, "detalis"> & {
+  shippingInfo: ShippingInfo;
+}
+
 export interface CheckoutFormData extends ShippingInfo {
   email: string;
 }

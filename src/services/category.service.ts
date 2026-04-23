@@ -7,8 +7,18 @@ export async function getAllCategories(): Promise<Category[]> {
     const errorMessage = await res.text();
     throw new Error(`Error geting categories ${errorMessage}`);
   }
-  const categiriesResponse: Category[] = await res.json();
-  return categiriesResponse;
+  const json = await res.json();
+
+  // if backend returns { data: [...] }
+  if (Array.isArray(json.data)) {
+    return json.data;
+  }
+
+  // if backend returns an array directly
+  if (Array.isArray(json)) {
+    return json;
+  }
+  throw new Error("Invalid categories response");
 };
 
 export async function getCategoryBySlug(slug: string): Promise<Category | null> {

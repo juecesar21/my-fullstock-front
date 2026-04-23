@@ -19,14 +19,14 @@ export default function Cart() {
             <div key={item.productId} className={styles.cart__item}>
               <div className={styles["cart__item-image"]}>
                 <img
-                  src={item.imgSrc}
-                  alt={item.title}
+                  src={item.imageUrl}
+                  alt={item.name}
                   className={styles["cart__item-image-content"]}
                 />
               </div>
               <div className={styles["cart__item-details"]}>
                 <div className={styles["cart__item-header"]}>
-                  <h2 className={styles["cart__item-title"]}>{item.title}</h2>
+                  <h2 className={styles["cart__item-title"]}>{item.name}</h2>
                   <Button
                     size="sm-icon"
                     variant="outline"
@@ -37,7 +37,7 @@ export default function Cart() {
                 </div>
                 <div className={styles["cart__item-footer"]}>
                   <p className={styles["cart__item-price"]}>
-                    {formatPrice(item.price)}
+                    {formatPrice(item.unitPrice)}
                   </p>
                   <div className={styles["cart__item-quantity"]}>
                     <Button

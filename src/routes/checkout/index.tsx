@@ -1,5 +1,5 @@
 import { X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 
 import {
@@ -47,10 +47,11 @@ export default function Checkout() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
-  if (!cart || !cart.items.length) {
-    navigate("/");
-    return null;
-  }
+  useEffect(() => {
+    if (!cart || !cart.items.length) {
+      navigate("/");
+    }
+  }, [cart, navigate])
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -83,19 +84,19 @@ export default function Checkout() {
                 <div key={item.productId} className={styles.checkout__item}>
                   <div className={styles["checkout__item-image"]}>
                     <img
-                      src={item.imgSrc}
-                      alt={item.title}
+                      src={item.imageUrl}
+                      alt={item.name}
                       className={styles["checkout__item-image-content"]}
                     />
                   </div>
                   <div className={styles["checkout__item-details"]}>
                     <h3 className={styles["checkout__item-title"]}>
-                      {item.title}
+                      {item.name}
                     </h3>
                     <div className={styles["checkout__item-price"]}>
                       <p>{item.quantity}</p>
                       <X className={styles["checkout__item-price-icon"]} />
-                      <p>{formatPrice(item.price)}</p>
+                      <p>{formatPrice(item.unitPrice)}</p>
                     </div>
                   </div>
                 </div>
@@ -165,13 +166,13 @@ export default function Checkout() {
                 />
                 <InputField
                   label="Provincia/Estado"
-                  name="region"
+                  name="state"
                   required
                   autoComplete="address-level1"
                 />
                 <InputField
                   label="Código Postal"
-                  name="zip"
+                  name="postalCode"
                   required
                   autoComplete="postal-code"
                 />

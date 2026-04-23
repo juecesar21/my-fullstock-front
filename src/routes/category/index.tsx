@@ -45,6 +45,7 @@ export default function Category() {
 
     async function fetchProducts() {
       const products = await getProductsByCategoryId(category!.id);
+      if (!products) return null
       setProducts(products);
       setLoading(false);
     }
