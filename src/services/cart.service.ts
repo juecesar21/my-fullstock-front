@@ -1,6 +1,5 @@
 import { BASE_URL } from "@/constants";
 import { Cart } from "@/models/cart.model";
-import { CartSchema } from "@/schemas/cart.schema";
 
 export async function getCart(): Promise<Cart | null> {
   const res = await fetch(`${BASE_URL}/cart`, {credentials: "include"});
@@ -9,7 +8,7 @@ export async function getCart(): Promise<Cart | null> {
     return null;
   }
   const cartResponse = await res.json();
-  return CartSchema.parse(cartResponse);
+  return cartResponse.data;
 }
 
 export async function updateCartItem(
@@ -37,7 +36,7 @@ export async function updateCartItem(
     throw new Error(`Error updating cart item ${message}`);
   }
   const cartResponse = await res.json();
-  return CartSchema.parse(cartResponse);
+  return cartResponse.data;
 }
 
 export async function removeCartItem(productId: number): Promise<Cart> {
