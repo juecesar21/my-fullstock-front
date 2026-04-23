@@ -1,8 +1,8 @@
 import { BASE_URL } from "@/constants";
-import { User } from "@/models/user.model";
+import { User, UserDto } from "@/models/user.model";
 
 export async function updateUser(
-  updatedUser: Partial<User> & { id: string }
+  updatedUser: UserDto
 ): Promise<User> {
   const options: RequestInit = {
     method: "PATCH",
@@ -17,6 +17,6 @@ export async function updateUser(
     const errorMessage = await res.text();
     throw new Error(`Error editing user profile ${errorMessage}`);
   }
-  const userUdated: User = await res.json();
-  return userUdated;
+  const userUdated = await res.json();
+  return userUdated.data;
 }
