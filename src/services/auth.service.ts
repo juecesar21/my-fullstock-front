@@ -4,7 +4,7 @@ import { User } from "@/models/user.model";
 export async function getCurrentUser(): Promise<User | null> {
   try {
     const options: RequestInit = {
-      method: "POST",
+      method: "GET",
       credentials: "include",
       headers: {
         "Content-Type": "application/json",
@@ -14,8 +14,8 @@ export async function getCurrentUser(): Promise<User | null> {
     if (!res.ok) {
       return null;
     }
-    const userResponse: User = await res.json();
-    return userResponse;
+    const userResponse = await res.json();
+    return userResponse.data;
   } catch (error) {
     console.log(`Error getting User ${error}`);
     return null;
@@ -36,8 +36,8 @@ export async function login(email: string, password: string): Promise<User> {
     const errorData = await res.text();
     throw new Error(`Authentication failed ${errorData}`);
   }
-  const userResponse: User = await res.json();
-  return userResponse;
+  const userResponse= await res.json();
+  return userResponse.data;
 }
 
 export async function signup(email: string, password: string): Promise<User> {
@@ -58,8 +58,8 @@ export async function signup(email: string, password: string): Promise<User> {
     const errorMessage = await res.text();
     throw new Error(`Registration failed ${errorMessage}`);
   }
-  const userResponse: User = await res.json();
-  return userResponse;
+  const userResponse = await res.json();
+  return userResponse.data;
 }
 
 export async function logout(): Promise<void> {
