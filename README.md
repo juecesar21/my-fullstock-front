@@ -4,9 +4,6 @@
 
 FullStock es una tienda online para desarrolladores web, construida con **React**, **TypeScript** y **Vite**. El proyecto implementa una arquitectura moderna y modular, con rutas protegidas, contexto global para autenticación, carrito y temas, y una experiencia de usuario responsiva y accesible.
 
-> **Importante:**  
-> Este proyecto **no está conectado a un backend real**. Todas las operaciones de autenticación, productos, categorías, usuarios y órdenes se simulan usando **promesas** y **datos temporales** en memoria o localStorage.
-
 ---
 
 ## Estructura del Proyecto
@@ -26,6 +23,7 @@ FullStock es una tienda online para desarrolladores web, construida con **React*
 │   ├── routes/
 │   ├── services/
 │   ├── styles/
+│   ├── constants.ts
 │   ├── main.tsx
 │   ├── router.tsx
 │   └── vite-env.d.ts
@@ -42,8 +40,8 @@ FullStock es una tienda online para desarrolladores web, construida con **React*
 
 1. **Clona el repositorio:**
    ```sh
-   git clone <url-del-repo>
-   cd <nombre-del-repo>
+   git clone <git@github.com:juecesar21/my-fullstock-front.git>
+   cd <my-fullstock-front>
    ```
 
 2. **Instala dependencias:**
@@ -66,18 +64,22 @@ FullStock es una tienda online para desarrolladores web, construida con **React*
 
 ---
 
-## Simulación de Backend
+## Servicios
 
-Todas las funciones de la carpeta [`src/services`](src/services) simulan peticiones a una API usando promesas y datos temporales. Ejemplos:
+Todas las funciones de la carpeta [`src/services`](src/services) hacen peticiones a una API local que esta configurado en el archivo [`constants.ts`](src/constants.ts) usando fetch:
 
 - **Autenticación:**  
-  [`auth.service.ts`](src/services/auth.service.ts) simula login, registro y logout usando localStorage y cookies.
-- **Productos y Categorías:**  
-  [`product.service.ts`](src/services/product.service.ts) y [`category.service.ts`](src/services/category.service.ts) devuelven datos mockeados con delays artificiales.
+  [`auth.service.ts`](src/services/auth.service.ts) gestiona login, registro y logout usando fetch y cookies.
+- **Productos:**  
+  [`product.service.ts`](src/services/product.service.ts) obtiene y devuelve productos del backend.
+- **Categorías:**  
+  [`category.service.ts`](src/services/category.service.ts) obtiene y devuelve categorias del backend.
 - **Carrito:**  
-  [`cart.service.ts`](src/services/cart.service.ts) gestiona el carrito en localStorage.
+  [`cart.service.ts`](src/services/cart.service.ts) obtiene y gestiona el carrito en el backend.
 - **Órdenes:**  
-  [`order.service.ts`](src/services/order.service.ts) simula la creación y consulta de órdenes.
+  [`order.service.ts`](src/services/order.service.ts) crea órdenes en la backend .
+- **User:**  
+  [`user.service.ts`](src/services/user.service.ts) actualiza datos del usuario.
 
 ---
 
@@ -86,7 +88,7 @@ Todas las funciones de la carpeta [`src/services`](src/services) simulan peticio
 - **Catálogo de productos** por categorías (Polos, Tazas, Stickers).
 - **Carrito de compras** persistente.
 - **Checkout** con formulario de contacto y resumen de orden.
-- **Autenticación** (registro, login, logout) simulada.
+- **Autenticación** (registro, login, logout).
 - **Gestión de temas** (claro/oscuro/sistema).
 - **Rutas protegidas y manejo de errores 404.**
 - **Componentes reutilizables** (botones, inputs, contenedores, separadores, etc).
@@ -105,12 +107,6 @@ Todas las funciones de la carpeta [`src/services`](src/services) simulan peticio
 
 - Utiliza **CSS Modules** y una arquitectura escalable de carpetas para estilos globales y utilidades.
 - CSS Custom Properties para colores, tipografía, espaciado y bordes.
-
----
-
-## Extender o conectar con un backend real
-
-Para conectar con una API real, reemplaza las funciones de la carpeta [`src/services`](src/services) por llamadas HTTP usando `fetch`.
 
 ---
 
